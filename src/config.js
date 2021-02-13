@@ -13,4 +13,5 @@ const firebaseConfig = {
 let db = Firebase.initializeApp(firebaseConfig);
 // check
 
+// check diffrent
 export default  db  
