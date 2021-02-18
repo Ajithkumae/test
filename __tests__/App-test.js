@@ -1,15 +1,151 @@
-/**
- * @format
- */
+import pizzas from '../src/data.json'
 
-import 'react-native';
-import React from 'react';
-import App from '../App';
 
-// Note: test renderer must be required after react-native.
-import renderer from 'react-test-renderer';
+test('the pizza data is correct', () => {
+  expect(pizzas).toMatchSnapshot();
+  expect(pizzas).toHaveLength(4);
+  expect(pizzas.map(pizza => pizza.name)).toEqual([
+    'Chicago Pizza',
+    'Neapolitan Pizza',
+    'New York Pizza',
+    'Sicilian Pizza',
+  ]);
+});
 
-test('renders correctly', () => {
-  const snap = renderer.create(<App />).toJSON();
-  expect(snap).toMatchSnapshot();
+
+// // let's test that each item in the pizza data has the correct properties
+for (let i = 0; i < pizzas.length; i += 1) {
+  it(`pizza[${i}] should have properties (id, name, image, desc, price)`, () => {
+    expect(pizzas[i]).toHaveProperty('id');
+    expect(pizzas[i]).toHaveProperty('name');
+    expect(pizzas[i]).toHaveProperty('image');
+    expect(pizzas[i]).toHaveProperty('desc');
+    expect(pizzas[i]).toHaveProperty('price');
+  });
+}
+
+
+// // default jest mock function
+test('mock implementation of a basic function', () => {
+  const mock = jest.fn(() => 3); // here funcation put
+
+  expect(mock('Calling my mock function!')).toBe(3);
+  // expect(mock).toHaveBeenCalledWith('Calling my mock function!'); // it should be called by this line 
+});
+
+
+
+
+
+// // let's mock the return value and test calls
+test('mock return value of a function one time', () => {
+  const mock = jest.fn();
+
+  // we can chain these!
+  mock.mockReturnValueOnce('Hello').mockReturnValueOnce('there').mockReturnValueOnce('!')
+
+  mock(); // first call 'Hello'
+  mock(); // second call 'there!'
+  mock(); // thirdcall  call 'there!'
+
+
+  expect(mock).toHaveBeenCalledTimes(3); // we know it's been called two times//mock has 3calls now
+
+  mock('Hello', '', 'Steve'); // call it with 3 different arguments
+  expect(mock).toHaveBeenCalledWith('Hello', '', 'Steve');
+
+  mock('Steve'); // called with 1 argument
+  expect(mock).toHaveBeenLastCalledWith('Steve');
+  console.log('calls ',mock);
+});
+
+
+
+// // let's mock the return value
+// difference between mockReturnValue & mockImplementation
+test('mock implementation of a function', () => {
+  const mock = jest.fn().mockImplementation(() => 'United Kingdom');
+  // expect(mock('Location')).toBe('United Kingdom2');
+  expect(mock('Location1')).toBe('United Kingdom');
+
+  // expect(mock).toHaveBeenCalledWith('Location');
+  // expect(mock).toHaveBeenCalledWith('Location2');
+
+});
+
+
+// // spying on a single function of an imported module, we can spy on its usage
+// by default the original function gets called, we can change this
+test('spying using original implementation', () => {
+  const pizza = {
+    name: n => `Pizza name: ${n}`,
+  };
+  const spy = jest.spyOn(pizza, 'name');
+  expect(pizza.name('Cheese')).toBe('Pizza name: Cheese');
+  expect(spy).toHaveBeenCalledWith('Cheese');
+});
+
+
+// // we can mock the implementation of a function from a module
+test('spying using mockImplementation', () => {
+  const pizza = {
+    name: n => `Pizza name: ${n}`,
+  };
+  const spy = jest.spyOn(pizza, 'name');
+  // spy.mockImplementation(n => `Crazy pizza!`);
+
+  // expect(pizza.name('Cheese')).toBe('Crazy pizza!');
+  spy.mockRestore(); // back to original implementation
+  expect(pizza.name('Cheese')).toBe('Pizza name: Cheese');
+});
+
+
+
+// // let's test pizza return output
+test('pizza returns new york pizza last', () => {
+  const pizza1 = pizzas[0];
+  const pizza2 = pizzas[1];
+  const pizza3 = pizzas[2];
+  const pizza = jest.fn(currentPizza => currentPizza.name);
+
+  pizza(pizza1); // chicago pizza
+  pizza(pizza2); // neapolitan pizza
+  pizza(pizza3); // new york pizza
+
+  expect(pizza).toHaveReturnedWith('Chicago Pizza');
+});
+
+
+// // let's match some data against our object
+test('pizza data has new york pizza and matches as an object', () => {
+  const newYorkPizza = {
+    id: 3,
+    name: 'New York Pizza',
+    image: '/images/ny-pizza.jpg',
+    desc:
+      'New York-style pizza has slices that are large and wide with a thin crust that is foldable yet crispy. It is traditionally topped with tomato sauce and mozzarella cheese.',
+    price: 8,
+  };
+  expect(pizzas[2]).toMatchObject(newYorkPizza);
+});
+
+
+
+// async example, always return a promise (can switch out resolves with reject)
+test('expect a promise to resolve', async () => {
+  const user = {
+    getFullName: jest.fn(() => Promise.resolve('Karl Hadwen')),
+  };
+  await expect(user.getFullName('Karl Hadwen')).resolves.toBe('Karl Hadwen');
+});
+
+test('expect a promise to reject', async () => {
+  const user = {
+    getFullName: jest.fn(() =>
+      Promise.reject(new Error('Something went wrong'))
+    ),
+  };
+  await expect(user.getFullName('')).rejects.toThrow(
+    'Something went wron'
+  );
 });
